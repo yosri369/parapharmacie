@@ -57,8 +57,6 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/payments/webhook").permitAll()
                 // Swagger
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
-                // Admin proxy image must be public for <img> tags
-                .requestMatchers(HttpMethod.GET, "/api/admin/marketing/proxy-image").permitAll()
                 // WebSockets
                 .requestMatchers("/ws/**").permitAll()
                 // Admin endpoints

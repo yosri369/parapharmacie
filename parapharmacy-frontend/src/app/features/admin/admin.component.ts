@@ -11,13 +11,13 @@ import { ToastService } from '../../core/services/toast.service';
 import { Order, Category, Product } from '../../core/models/models';
 import { InventoryComponent } from './inventory/inventory.component';
 import { SuppliersComponent } from './suppliers/suppliers.component';
-import { MarketingStudioComponent } from './marketing-studio/marketing-studio.component';
+
 import { AnnouncementAdminComponent } from './announcement-admin/announcement-admin.component';
 
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, BaseChartDirective, InventoryComponent, SuppliersComponent, MarketingStudioComponent, AnnouncementAdminComponent],
+  imports: [CommonModule, RouterLink, FormsModule, BaseChartDirective, InventoryComponent, SuppliersComponent, AnnouncementAdminComponent],
   template: `
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div class="flex items-center gap-4 mb-8">
@@ -67,10 +67,6 @@ import { AnnouncementAdminComponent } from './announcement-admin/announcement-ad
         <app-suppliers></app-suppliers>
       }
 
-      <!-- Marketing Studio Tab -->
-      @if (activeTab() === 'marketing') {
-        <app-marketing-studio></app-marketing-studio>
-      }
 
       <!-- Announcements Ticker Tab -->
       @if (activeTab() === 'announcements') {
@@ -687,7 +683,7 @@ export class AdminComponent implements OnInit {
     { key: 'announcements',label: 'Fil d\'annonces', icon: '📢' },
     { key: 'inventory',    label: 'Stocks',           icon: '📦' },
     { key: 'suppliers',  label: 'Fournisseurs',   icon: '🤝' },
-    { key: 'marketing',  label: 'Marketing AI',   icon: '✨' },
+
     { key: 'orders',     label: 'Commandes',      icon: '🛒' },
     { key: 'products',   label: 'Produits',       icon: '🧴' },
     { key: 'categories', label: 'Catégories',     icon: '📂' },

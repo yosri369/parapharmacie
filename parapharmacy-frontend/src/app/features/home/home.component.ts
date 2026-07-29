@@ -291,12 +291,34 @@ gsap.registerPlugin(ScrollTrigger);
       <div class="section-container">
         <div class="cta-section__content">
           <span class="section-overline section-overline--light">Commencez maintenant</span>
-          <h2 class="cta-section__title">Prêt à prendre soin de vous&nbsp;?</h2>
-          <p class="cta-section__sub">Rejoignez des milliers de clients satisfaits et découvrez nos produits de qualité pharmaceutique.</p>
-          <div class="cta-section__actions">
-            <a routerLink="/shop" class="lux-btn lux-btn--primary">Commencer mes achats</a>
-            <a routerLink="/auth/register" class="lux-btn lux-btn--ghost">Créer un compte</a>
-          </div>
+
+          @if (!auth.isLoggedIn()) {
+            <h2 class="cta-section__title">Prêt à prendre soin de vous&nbsp;?</h2>
+            <p class="cta-section__sub">Rejoignez des milliers de clients satisfaits et découvrez nos produits de qualité pharmaceutique.</p>
+            <div class="cta-section__actions">
+              <a routerLink="/shop" class="lux-btn lux-btn--primary">Commencer mes achats</a>
+              <a routerLink="/auth/register" class="lux-btn lux-btn--ghost">Créer un compte</a>
+            </div>
+          }
+
+          @if (auth.isLoggedIn() && auth.isAdmin()) {
+            <h2 class="cta-section__title">Bienvenue, {{ auth.currentUser()?.firstName }}&nbsp;!</h2>
+            <p class="cta-section__sub">Gérez vos produits, commandes et annonces depuis le tableau de bord administrateur.</p>
+            <div class="cta-section__actions">
+              <a routerLink="/shop" class="lux-btn lux-btn--primary">Voir la boutique</a>
+              <a routerLink="/admin" class="lux-btn lux-btn--ghost">Administration</a>
+            </div>
+          }
+
+          @if (auth.isLoggedIn() && !auth.isAdmin()) {
+            <h2 class="cta-section__title">Bienvenue, {{ auth.currentUser()?.firstName }}&nbsp;!</h2>
+            <p class="cta-section__sub">Découvrez nos nouveautés et retrouvez vos commandes depuis votre espace personnel.</p>
+            <div class="cta-section__actions">
+              <a routerLink="/shop" class="lux-btn lux-btn--primary">Commencer mes achats</a>
+              <a routerLink="/profile" class="lux-btn lux-btn--ghost">Mon Profil</a>
+            </div>
+          }
+
         </div>
       </div>
     </section>

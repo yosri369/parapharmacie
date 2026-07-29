@@ -156,13 +156,4 @@ export class AdminService {
   updatePurchaseRequestStatus(id: number, status: string): Observable<any> {
     return this.http.patch<any>(`${this.base}/admin/suppliers/requests/${id}/status`, { status });
   }
-
-  // Marketing Studio
-  generateMarketingCampaign(data: any): Observable<any[]> {
-    return this.http.post<any[]>(`${this.base}/admin/marketing/generate`, data);
-  }
-
-  getMarketingHistory(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.base}/admin/marketing/history`);
-  }
 }
