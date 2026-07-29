@@ -17,3 +17,14 @@ export const adminGuard: CanActivateFn = (route, state) => {
   router.navigate(['/']);
   return false;
 };
+
+/** Prevents already-logged-in users from accessing auth pages (login, register) */
+export const guestGuard: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  if (auth.isLoggedIn()) {
+    router.navigate(['/']);
+    return false;
+  }
+  return true;
+};
