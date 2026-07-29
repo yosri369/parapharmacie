@@ -27,6 +27,7 @@ export const routes: Routes = [
     children: [
       { path: '', loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent) },
       { path: 'orders', loadComponent: () => import('./features/orders/orders.component').then(m => m.OrdersComponent) },
+      { path: 'orders/:id', loadComponent: () => import('./features/orders/order-detail.component').then(m => m.OrderDetailComponent) },
     ]
   },
   { path: 'about', loadComponent: () => import('./features/about/about.component').then(m => m.AboutComponent) },

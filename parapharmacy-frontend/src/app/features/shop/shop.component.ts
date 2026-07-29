@@ -392,5 +392,17 @@ export class ShopComponent implements OnInit {
   resetFilters() { this.selectedCategory.set(null); this.searchQuery = ''; this.sortBy = 'newest'; this.onSaleOnly = false; this.featuredOnly = false; this.currentPage.set(0); this.load(); }
   hasActiveFilters() { return !!(this.selectedCategory() || this.searchQuery || this.onSaleOnly || this.featuredOnly); }
   activeCategoryName() { return this.categories().find(c => c.id === this.selectedCategory())?.name ?? ''; }
-  pageNumbers() { return Array.from({ length: Math.min(this.pageData()?.totalPages ?? 0, 5) }, (_, i) => i); }
+  pageNumbers() {
+    const total = this.pageData()?.totalPages ?? 0;
+    const current = this.currentPage();
+    const maxVisible = 5;
+    let start = Math.max(0, current - Math.floor(maxVisible / 2));
+    let end = Math.min(total, start + maxVisible);
+    if (end - start < maxVisible) {
+      start = Math.max(0, end - maxVisible);
+    }
+    const pages: number[] = [];
+    for (let i = start; i < end; i++) pages.push(i);
+    return pages;
+  }
 }

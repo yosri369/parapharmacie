@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -19,6 +19,21 @@ import { AnnouncementAdminComponent } from './announcement-admin/announcement-ad
   standalone: true,
   imports: [CommonModule, RouterLink, FormsModule, BaseChartDirective, InventoryComponent, SuppliersComponent, AnnouncementAdminComponent],
   template: `
+    <!-- ── Confirmation Modal ── -->
+    @if (confirmDialog().show) {
+      <div class="confirm-overlay" (click)="cancelConfirm()">
+        <div class="confirm-modal" (click)="$event.stopPropagation()">
+          <div class="confirm-icon">⚠️</div>
+          <h3 class="confirm-title">Confirmer la suppression</h3>
+          <p class="confirm-msg">{{ confirmDialog().message }}</p>
+          <div class="confirm-actions">
+            <button (click)="cancelConfirm()" class="confirm-btn-cancel">Annuler</button>
+            <button (click)="executeConfirm()" class="confirm-btn-delete">🗑 Supprimer</button>
+          </div>
+        </div>
+      </div>
+    }
+
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div class="flex items-center gap-4 mb-8">
         <div class="w-10 h-10 bg-sage-500 rounded-xl flex items-center justify-center">
@@ -662,6 +677,38 @@ import { AnnouncementAdminComponent } from './announcement-admin/announcement-ad
           </table>
         </div>
       }
+      <!-- Confirmation Modal Styles -->
+      <style>
+        .confirm-overlay {
+          position: fixed; inset: 0; z-index: 99999;
+          background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
+          display: flex; align-items: center; justify-content: center; p: 1rem;
+          animation: fadeIn 0.2s ease-out;
+        }
+        .confirm-modal {
+          background: white; border-radius: 1.25rem; max-width: 420px; width: 100%;
+          padding: 1.75rem; text-align: center;
+          box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+          border: 1px solid #f1f5f9; animation: scaleUp 0.2s ease-out;
+        }
+        .confirm-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+        .confirm-title { font-size: 1.25rem; font-weight: 800; color: #0f172a; margin-bottom: 0.5rem; }
+        .confirm-msg { font-size: 0.9rem; color: #64748b; margin-bottom: 1.5rem; line-height: 1.5; }
+        .confirm-actions { display: flex; gap: 0.75rem; }
+        .confirm-btn-cancel {
+          flex: 1; padding: 0.65rem 1rem; border-radius: 0.75rem; font-weight: 600; font-size: 0.9rem;
+          background: #f1f5f9; color: #475569; border: none; cursor: pointer; transition: all 0.15s;
+        }
+        .confirm-btn-cancel:hover { background: #e2e8f0; }
+        .confirm-btn-delete {
+          flex: 1; padding: 0.65rem 1rem; border-radius: 0.75rem; font-weight: 700; font-size: 0.9rem;
+          background: #ef4444; color: white; border: none; cursor: pointer; transition: all 0.15s;
+          box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+        .confirm-btn-delete:hover { background: #dc2626; transform: translateY(-1px); }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes scaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+      </style>
     </div>
   `
 })
@@ -800,13 +847,11 @@ export class AdminComponent implements OnInit {
   }
 
   deleteProduct(id: number) {
-    if (!confirm('Delete this product?')) return;
-    this.adminSvc.deleteProduct(id).subscribe({
-      next: () => {
-        this.toast.success('Product deleted');
-        this.products.update(list => list.filter(p => p.id !== id));
-      },
-      error: () => this.toast.error('Failed to delete product')
+    this.showConfirm('Voulez-vous vraiment supprimer ce produit ? Cette action est irréversible.', () => {
+      this.adminSvc.deleteProduct(id).subscribe({
+        next: () => { this.toast.success('Produit supprimé.'); this.products.update(list => list.filter(p => p.id !== id)); },
+        error: () => this.toast.error('Erreur lors de la suppression du produit.')
+      });
     });
   }
 
@@ -827,10 +872,11 @@ export class AdminComponent implements OnInit {
   }
 
   deleteBlogPost(id: number) {
-    if (!confirm('Delete this article?')) return;
-    this.adminSvc.deleteBlogPost(id).subscribe({
-      next: () => { this.toast.success('Article deleted'); this.blogPosts.update(list => list.filter(p => p.id !== id)); },
-      error: () => this.toast.error('Failed to delete article')
+    this.showConfirm('Voulez-vous vraiment supprimer cet article ? Cette action est irréversible.', () => {
+      this.adminSvc.deleteBlogPost(id).subscribe({
+        next: () => { this.toast.success('Article supprimé.'); this.blogPosts.update(list => list.filter(p => p.id !== id)); },
+        error: () => this.toast.error('Erreur lors de la suppression de l\'article.')
+      });
     });
   }
 
@@ -916,10 +962,29 @@ export class AdminComponent implements OnInit {
   }
 
   deletePromoCode(id: number) {
-    if (!confirm('Supprimer ce code promo ?')) return;
-    this.adminSvc.deletePromo(id).subscribe({
-      next: () => { this.promos.update(l => l.filter(x => x.id !== id)); this.toast.success('Code supprimé'); },
-      error: () => this.toast.error('Erreur')
+    this.showConfirm('Voulez-vous vraiment supprimer ce code promo ?', () => {
+      this.adminSvc.deletePromo(id).subscribe({
+        next: () => { this.promos.update(l => l.filter(x => x.id !== id)); this.toast.success('Code promo supprimé.'); },
+        error: () => this.toast.error('Erreur lors de la suppression.')
+      });
     });
+  }
+
+  // ── Confirm Dialog ──────────────────────────────────────────────────────
+  confirmDialog = signal<{ show: boolean; message: string; action: (() => void) | null }>({
+    show: false, message: '', action: null
+  });
+
+  showConfirm(message: string, action: () => void) {
+    this.confirmDialog.set({ show: true, message, action });
+  }
+
+  executeConfirm() {
+    this.confirmDialog().action?.();
+    this.confirmDialog.set({ show: false, message: '', action: null });
+  }
+
+  cancelConfirm() {
+    this.confirmDialog.set({ show: false, message: '', action: null });
   }
 }
