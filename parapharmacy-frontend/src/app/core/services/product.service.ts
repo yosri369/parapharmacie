@@ -24,6 +24,10 @@ export class ProductService {
     return this.http.get<Product>(`${environment.apiUrl}/products/slug/${slug}`);
   }
 
+  getProductByBarcode(barcode: string): Observable<Product> {
+    return this.http.get<Product>(`${environment.apiUrl}/products/barcode/${barcode}`);
+  }
+
   getFeatured(): Observable<Product[]> {
     return this.http.get<Product[]>(`${environment.apiUrl}/products/featured`);
   }

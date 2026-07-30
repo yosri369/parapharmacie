@@ -479,6 +479,10 @@ import { AnnouncementAdminComponent } from './announcement-admin/announcement-ad
               <input [(ngModel)]="newProduct.brand" class="input-field" placeholder="Ex: La Roche-Posay">
             </div>
             <div>
+              <label class="label-field">Code-barres (EAN / Scanner)</label>
+              <input [(ngModel)]="newProduct.barcode" class="input-field" placeholder="Ex: 3337875543219">
+            </div>
+            <div>
               <label class="label-field">Prix (TND)</label>
               <input [(ngModel)]="newProduct.price" class="input-field" type="number" placeholder="29.90">
             </div>
@@ -746,7 +750,7 @@ export class AdminComponent implements OnInit {
 
   statuses = ['PENDING','CONFIRMED','PROCESSING','SHIPPED','DELIVERED','CANCELLED'];
 
-  newProduct: any = { name:'', brand:'', price:0, salePrice:null, stock:0, categoryId:'', imageUrl:'', description:'', featured:false, onSale:false };
+  newProduct: any = { name:'', brand:'', barcode:'', price:0, salePrice:null, stock:0, categoryId:'', imageUrl:'', description:'', featured:false, onSale:false };
   newCategory: any = { name:'', icon:'', imageUrl:'', description:'' };
 
   // Analytics
@@ -840,7 +844,7 @@ export class AdminComponent implements OnInit {
       next: (p) => {
         this.toast.success('Product created successfully!');
         this.products.update(list => [...list, p]);
-        this.newProduct = { name:'', brand:'', price:0, salePrice:null, stock:0, categoryId:'', imageUrl:'', description:'', featured:false, onSale:false };
+        this.newProduct = { name:'', brand:'', barcode:'', price:0, salePrice:null, stock:0, categoryId:'', imageUrl:'', description:'', featured:false, onSale:false };
       },
       error: () => this.toast.error('Failed to create product')
     });

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../core/services/api.service';
@@ -12,7 +12,33 @@ import { ToastService } from '../../../core/services/toast.service';
   imports: [CommonModule, FormsModule],
   template: `
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <h1 class="text-3xl font-display font-bold text-gray-900 mb-8">📦 Gestion des Stocks</h1>
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <div>
+          <h1 class="text-3xl font-display font-bold text-gray-900">📦 Gestion des Stocks</h1>
+          <p class="text-xs text-gray-500 mt-1">Scanner d'inventaire prêt (Pistolet USB/Bluetooth actif)</p>
+        </div>
+
+        <!-- Scanner Widget -->
+        <div class="bg-emerald-900 text-white rounded-2xl px-5 py-3 flex items-center gap-4 shadow-lg shadow-emerald-900/20 border border-emerald-700/50">
+          <div class="relative flex items-center justify-center w-3 h-3">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400"></span>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-emerald-300 uppercase tracking-wider">Pistolet Code-Barres</div>
+            <div class="text-xs text-emerald-100">
+              @if (lastScannedBarcode()) {
+                Scanné: <code class="font-mono bg-emerald-950 px-1.5 py-0.5 rounded text-emerald-300">{{ lastScannedBarcode() }}</code>
+              } @else {
+                En attente de détection...
+              }
+            </div>
+          </div>
+          <button (click)="openQuickScanModal()" class="ml-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-3 py-1.5 rounded-xl font-bold text-xs transition-all">
+            ⚡ Scan Rapide
+          </button>
+        </div>
+      </div>
 
       <!-- Alerts Section -->
       @if (!loadingAlerts()) {
@@ -97,6 +123,7 @@ import { ToastService } from '../../../core/services/toast.service';
             <thead>
               <tr class="bg-gray-50 text-gray-500 text-sm uppercase tracking-wider">
                 <th class="p-4 font-semibold">Produit</th>
+                <th class="p-4 font-semibold">Code-barres</th>
                 <th class="p-4 font-semibold text-center">Stock Global</th>
                 <th class="p-4 font-semibold text-center">Seuil d'alerte</th>
                 <th class="p-4 font-semibold text-right">Actions</th>
@@ -113,6 +140,9 @@ import { ToastService } from '../../../core/services/toast.service';
                         <div class="text-xs text-gray-500">{{ p.brand }}</div>
                       </div>
                     </div>
+                  </td>
+                  <td class="p-4 font-mono text-xs text-gray-500">
+                    {{ p.barcode || '—' }}
                   </td>
                   <td class="p-4 text-center">
                     <span class="inline-flex items-center justify-center px-2.5 py-1 rounded-full font-bold text-sm"
@@ -230,6 +260,52 @@ import { ToastService } from '../../../core/services/toast.service';
                 </div>
               }
             </div>
+          <!-- Quick Scan Barcode Modal -->
+          @if (activeModal() === 'QUICK_SCAN') {
+            <div class="p-8">
+              <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                  <span>⚡</span> Scanner de Code-Barres
+                </h2>
+                <button (click)="closeModal()" class="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+              </div>
+
+              <div class="bg-slate-900 text-white rounded-2xl p-6 mb-6 text-center space-y-3">
+                <div class="text-4xl animate-bounce">📱</div>
+                <p class="font-bold text-slate-200">Utilisez votre pistolet scanner ou saisissez manuellement :</p>
+                <div class="flex gap-2 max-w-md mx-auto">
+                  <input #manualInput type="text" [(ngModel)]="manualBarcode" 
+                         (keyup.enter)="onBarcodeScanned(manualBarcode); manualBarcode=''"
+                         placeholder="Code-barres (ex: 3337875543219)" 
+                         class="input-field bg-slate-800 border-slate-700 text-white placeholder-slate-500 font-mono">
+                  <button (click)="onBarcodeScanned(manualBarcode); manualBarcode=''" 
+                          class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-4 py-2 rounded-xl font-bold text-sm">
+                    Chercher
+                  </button>
+                </div>
+              </div>
+
+              @if (scannedProduct()) {
+                <div class="border-2 border-emerald-500/30 bg-emerald-50/50 rounded-2xl p-6 space-y-4">
+                  <div class="flex items-center gap-4">
+                    <img [src]="scannedProduct()!.imageUrl" class="w-16 h-16 rounded-xl object-cover bg-white border border-emerald-100" onerror="this.src='https://placehold.co/64'">
+                    <div class="flex-1">
+                      <h3 class="font-bold text-slate-900 text-lg">{{ scannedProduct()!.name }}</h3>
+                      <p class="text-xs text-slate-500">{{ scannedProduct()!.brand }} · Code: <code class="font-mono text-emerald-700">{{ scannedProduct()!.barcode }}</code></p>
+                      <p class="text-sm font-semibold text-emerald-600 mt-1">Stock actuel : {{ scannedProduct()!.stock }} unité(s)</p>
+                    </div>
+                  </div>
+                  <div class="flex gap-3 pt-2">
+                    <button (click)="openAddStockModal(scannedProduct()!)" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl font-bold text-sm">
+                      + Ajouter du Stock
+                    </button>
+                    <button (click)="openBatchesModal(scannedProduct()!)" class="flex-1 bg-slate-800 hover:bg-slate-900 text-white py-2.5 rounded-xl font-bold text-sm">
+                      Gérer les Lots
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
           }
 
         </div>
@@ -249,14 +325,41 @@ export class InventoryComponent implements OnInit {
   products = signal<Product[]>([]);
   searchQuery = '';
   
-  activeModal = signal<'ADD_STOCK' | 'MANAGE_BATCHES' | null>(null);
+  activeModal = signal<'ADD_STOCK' | 'MANAGE_BATCHES' | 'QUICK_SCAN' | null>(null);
   selectedProduct = signal<Product | null>(null);
+  scannedProduct = signal<Product | null>(null);
   
   addStockData: any = {};
   submitting = signal(false);
 
   productBatches = signal<any[]>([]);
   batchesLoading = signal(false);
+
+  lastScannedBarcode = signal<string | null>(null);
+  manualBarcode = '';
+  private barcodeBuffer = '';
+  private lastKeyTime = Date.now();
+
+  @HostListener('window:keydown', ['$event'])
+  handleGlobalKeyboard(event: KeyboardEvent) {
+    const now = Date.now();
+    const timeDiff = now - this.lastKeyTime;
+    this.lastKeyTime = now;
+
+    // Reset buffer if human delay (> 80ms per key)
+    if (timeDiff > 80) {
+      this.barcodeBuffer = '';
+    }
+
+    if (event.key === 'Enter') {
+      if (this.barcodeBuffer.length >= 4) {
+        this.onBarcodeScanned(this.barcodeBuffer);
+        this.barcodeBuffer = '';
+      }
+    } else if (event.key.length === 1 && !event.ctrlKey && !event.altKey && !event.metaKey) {
+      this.barcodeBuffer += event.key;
+    }
+  }
 
   ngOnInit() {
     this.loadAlerts();
@@ -313,6 +416,37 @@ export class InventoryComponent implements OnInit {
   closeModal() {
     this.activeModal.set(null);
     this.selectedProduct.set(null);
+    this.scannedProduct.set(null);
+  }
+
+  openQuickScanModal() {
+    this.activeModal.set('QUICK_SCAN');
+  }
+
+  onBarcodeScanned(barcode: string) {
+    if (!barcode) return;
+    const cleanBarcode = barcode.trim();
+    this.lastScannedBarcode.set(cleanBarcode);
+    
+    this.productSvc.getProductByBarcode(cleanBarcode).subscribe({
+      next: (product) => {
+        this.scannedProduct.set(product);
+        this.toastSvc.success(`Produit scanné : ${product.name}`);
+        if (this.activeModal() !== 'QUICK_SCAN') {
+          this.activeModal.set('QUICK_SCAN');
+        }
+      },
+      error: () => {
+        // Fallback: search by name/barcode substring in loaded products
+        const localMatch = this.products().find(p => p.barcode === cleanBarcode || p.name.toLowerCase().includes(cleanBarcode.toLowerCase()));
+        if (localMatch) {
+          this.scannedProduct.set(localMatch);
+          this.toastSvc.success(`Produit trouvé : ${localMatch.name}`);
+        } else {
+          this.toastSvc.error(`Aucun produit trouvé pour le code-barres : ${cleanBarcode}`);
+        }
+      }
+    });
   }
 
   submitAddStock() {

@@ -54,6 +54,13 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("Product not found"));
     }
 
+    public ProductDTO getProductByBarcode(String barcode) {
+        return productRepository.findByBarcode(barcode)
+                .filter(p -> p.isActive())
+                .map(this::toDTO)
+                .orElseThrow(() -> new RuntimeException("Product not found for barcode: " + barcode));
+    }
+
     public List<ProductDTO> getFeaturedProducts() {
         return productRepository.findByFeaturedTrueAndActiveTrue().stream().map(this::toDTO).toList();
     }
@@ -74,6 +81,7 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("Category not found"));
         Product product = Product.builder()
                 .name(req.getName())
+                .barcode(req.getBarcode())
                 .description(req.getDescription())
                 .price(req.getPrice())
                 .salePrice(req.getSalePrice())
@@ -94,6 +102,7 @@ public class ProductService {
     public ProductDTO updateProduct(Long id, ProductCreateRequest req) {
         Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
         if (req.getName() != null) product.setName(req.getName());
+        if (req.getBarcode() != null) product.setBarcode(req.getBarcode());
         if (req.getDescription() != null) product.setDescription(req.getDescription());
         if (req.getPrice() != null) product.setPrice(req.getPrice());
         if (req.getSalePrice() != null) product.setSalePrice(req.getSalePrice());
@@ -146,6 +155,7 @@ public class ProductService {
                 .id(p.getId())
                 .name(p.getName())
                 .slug(p.getSlug())
+                .barcode(p.getBarcode())
                 .description(p.getDescription())
                 .price(p.getPrice())
                 .salePrice(p.getSalePrice())

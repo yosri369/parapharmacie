@@ -54,6 +54,11 @@ public class ProductController {
         return ResponseEntity.ok(productService.getProductBySlug(slug));
     }
 
+    @GetMapping("/barcode/{barcode}")
+    public ResponseEntity<ProductDTO> getByBarcode(@PathVariable String barcode) {
+        return ResponseEntity.ok(productService.getProductByBarcode(barcode));
+    }
+
     @GetMapping("/{id}/related")
     public ResponseEntity<List<ProductDTO>> getRelated(@PathVariable Long id) {
         return ResponseEntity.ok(productService.getRelatedProducts(id));

@@ -7,6 +7,7 @@ import java.util.List;
 @Data @Builder @NoArgsConstructor @AllArgsConstructor
 public class ProductCreateRequest {
     private String name;
+    private String barcode;
     private String description;
     private BigDecimal price;
     private BigDecimal salePrice;

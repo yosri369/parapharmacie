@@ -19,6 +19,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByFeaturedTrueAndActiveTrue();
     List<Product> findByOnSaleTrueAndActiveTrue();
     Optional<Product> findBySlug(String slug);
+    Optional<Product> findByBarcode(String barcode);
 
     @Query("SELECT p FROM Product p WHERE p.active = true AND (" +
            "LOWER(p.name) LIKE LOWER(CONCAT('%', :q, '%')) OR " +

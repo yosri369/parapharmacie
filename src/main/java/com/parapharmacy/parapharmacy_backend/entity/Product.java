@@ -25,6 +25,9 @@ public class Product {
     @Column(unique = true)
     private String slug;
 
+    @Column(unique = true)
+    private String barcode;
+
     @Column(columnDefinition = "TEXT")
     private String description;
 
