@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: parapharmacy_db
+    restart: always
+    environment:
+      POSTGRES_DB: vitanova_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-0000}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: parapharmacy_backend
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/vitanova_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-0000}
+      APP_JWT_SECRET: ${JWT_SECRET:-404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+      KONNECT_API_KEY: ${KONNECT_API_KEY:-dev-key}
+      KONNECT_API_SECRET: ${KONNECT_API_SECRET:-dev-secret}
+      KONNECT_WEBHOOK_SECRET: ${KONNECT_WEBHOOK_SECRET:-dev-webhook}
+      APP_CORS_ALLOWED_ORIGINS: "${ALLOWED_ORIGINS:-http://localhost,http://localhost:80}"
+    ports:
+      - "8081:8081"
+
+  frontend:
+    build:
+      context: ./parapharmacy-frontend
+      dockerfile: Dockerfile
+    container_name: parapharmacy_frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+volumes:
+  postgres_data:
