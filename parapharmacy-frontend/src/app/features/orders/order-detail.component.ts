@@ -1,8 +1,8 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute } from '@angular/router';
-import { OrderService } from '../../../core/services/api.service';
-import { Order } from '../../../core/models/models';
+import { OrderService } from '../../core/services/api.service';
+import { Order } from '../../core/models/models';
 
 @Component({
   selector: 'app-order-detail',
