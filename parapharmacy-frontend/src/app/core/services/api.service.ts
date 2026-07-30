@@ -19,6 +19,19 @@ export class OrderService {
   placeOrder(payload: any): Observable<Order> {
     return this.http.post<Order>(`${environment.apiUrl}/orders`, payload);
   }
+
+  downloadInvoice(orderId: number) {
+    this.http.get(`${environment.apiUrl}/orders/${orderId}/invoice`, { responseType: 'text' }).subscribe({
+      next: (html) => {
+        const win = window.open('', '_blank');
+        if (win) {
+          win.document.write(html);
+          win.document.close();
+          setTimeout(() => win.print(), 500);
+        }
+      }
+    });
+  }
 }
 
 @Injectable({ providedIn: 'root' })

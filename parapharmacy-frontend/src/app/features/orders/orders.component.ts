@@ -49,7 +49,11 @@ import { Order } from '../../core/models/models';
                       {{ statusLabel(order.status) }}
                     </span>
                     <span class="order-total">{{ order.totalAmount | number:'1.2-2' }} TND</span>
-                    <a [routerLink]="['/profile/orders', order.id]" class="text-xs font-bold text-emerald-600 hover:text-emerald-700 underline ml-2">Détails →</a>
+                    <button (click)="orderSvc.downloadInvoice(order.id)" title="Télécharger la Facture PDF"
+                            class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-bold transition-all border border-emerald-200/60 flex items-center gap-1">
+                      📄 Facture PDF
+                    </button>
+                    <a [routerLink]="['/profile/orders', order.id]" class="text-xs font-bold text-slate-600 hover:text-emerald-700 underline ml-1">Détails →</a>
                   </div>
                 </div>
                 <div class="order-card__items">

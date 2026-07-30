@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
-import { AdminService } from '../../core/services/api.service';
+import { AdminService, OrderService } from '../../core/services/api.service';
 import { CategoryService } from '../../core/services/category.service';
 import { ProductService } from '../../core/services/product.service';
 import { ToastService } from '../../core/services/toast.service';
@@ -336,14 +336,18 @@ import { AnnouncementAdminComponent } from './announcement-admin/announcement-ad
                   <tr class="hover:bg-gray-50 transition-colors">
                     <td class="px-5 py-4 font-medium">#{{ order.id }}</td>
                     <td class="px-5 py-4 text-gray-500">{{ order.userEmail }}</td>
-                    <td class="px-5 py-4 font-semibold">{{ order.totalAmount | number:'1.2-2' }} €</td>
+                    <td class="px-5 py-4 font-semibold">{{ order.totalAmount | number:'1.2-2' }} TND</td>
                     <td class="px-5 py-4">
                       <span class="badge text-xs px-2.5 py-1" [class]="statusClass(order.status)">{{ order.status }}</span>
                     </td>
-                    <td class="px-5 py-4">
+                    <td class="px-5 py-4 flex items-center gap-2">
                       <select (change)="updateStatus(order.id, $event)" class="text-xs border border-gray-200 rounded-lg px-2 py-1">
                         @for (s of statuses; track s) { <option [value]="s" [selected]="s === order.status">{{ s }}</option> }
                       </select>
+                      <button (click)="orderSvc.downloadInvoice(order.id)" title="Télécharger la Facture PDF"
+                              class="text-xs px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 font-bold transition-all">
+                        📄 Facture PDF
+                      </button>
                     </td>
                   </tr>
                 }
@@ -718,6 +722,7 @@ import { AnnouncementAdminComponent } from './announcement-admin/announcement-ad
 })
 export class AdminComponent implements OnInit {
   adminSvc    = inject(AdminService);
+  orderSvc    = inject(OrderService);
   categorySvc = inject(CategoryService);
   productSvc  = inject(ProductService);
   toast       = inject(ToastService);

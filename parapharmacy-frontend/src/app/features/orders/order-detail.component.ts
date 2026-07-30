@@ -17,9 +17,14 @@ import { Order } from '../../core/models/models';
             ← Retour à mes commandes
           </a>
           @if (order()) {
-            <span class="px-3 py-1 rounded-full text-xs font-bold" [class]="statusClass(order()!.status)">
-              {{ statusLabel(order()!.status) }}
-            </span>
+            <div class="flex items-center gap-3">
+              <button (click)="orderSvc.downloadInvoice(order()!.id)" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5">
+                📄 Imprimer / Facture PDF
+              </button>
+              <span class="px-3 py-1 rounded-full text-xs font-bold" [class]="statusClass(order()!.status)">
+                {{ statusLabel(order()!.status) }}
+              </span>
+            </div>
           }
         </div>
 
@@ -102,7 +107,7 @@ import { Order } from '../../core/models/models';
   `
 })
 export class OrderDetailComponent implements OnInit {
-  private orderSvc = inject(OrderService);
+  orderSvc = inject(OrderService);
   private route    = inject(ActivatedRoute);
 
   order   = signal<Order | null>(null);

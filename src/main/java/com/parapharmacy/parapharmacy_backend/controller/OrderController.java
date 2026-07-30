@@ -33,4 +33,11 @@ public class OrderController {
                                                 @RequestBody PlaceOrderRequest req) {
         return ResponseEntity.ok(orderService.placeOrder(user, req));
     }
+
+    @GetMapping(value = "/{id}/invoice", produces = "text/html;charset=UTF-8")
+    public ResponseEntity<String> getInvoice(@AuthenticationPrincipal User user, @PathVariable Long id) {
+        boolean isAdmin = user.getRole() != null && user.getRole().name().equals("ROLE_ADMIN");
+        String html = orderService.getInvoiceHtml(id, user.getEmail(), isAdmin);
+        return ResponseEntity.ok(html);
+    }
 }

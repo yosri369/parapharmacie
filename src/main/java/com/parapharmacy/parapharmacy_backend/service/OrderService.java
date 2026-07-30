@@ -35,6 +35,7 @@ public class OrderService {
     private final KonnectService konnectService;
     private final EmailService emailService;
     private final PromoCodeService promoCodeService;
+    private final PdfInvoiceService pdfInvoiceService;
 
     public List<OrderDTO> getUserOrders(User user) {
         return orderRepository.findByUserIdOrderByCreatedAtDesc(user.getId()).stream().map(this::toDTO).toList();
@@ -45,6 +46,10 @@ public class OrderService {
                 .filter(o -> o.getUser().getId().equals(user.getId()))
                 .orElseThrow(() -> new RuntimeException("Order not found"));
         return toDTO(order);
+    }
+
+    public String getInvoiceHtml(Long orderId, String currentUserEmail, boolean isAdmin) {
+        return pdfInvoiceService.generateInvoiceHtml(orderId, currentUserEmail, isAdmin);
     }
 
     public OrderDTO placeOrder(User user, PlaceOrderRequest req) {
