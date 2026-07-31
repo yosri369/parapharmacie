@@ -260,6 +260,8 @@ import { ToastService } from '../../../core/services/toast.service';
                 </div>
               }
             </div>
+          }
+
           <!-- Quick Scan Barcode Modal -->
           @if (activeModal() === 'QUICK_SCAN') {
             <div class="p-8">
